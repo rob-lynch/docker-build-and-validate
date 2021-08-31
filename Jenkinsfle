@@ -1,0 +1,23 @@
+#!groovy
+node() {
+    String imageName = "test-image"
+
+    stage('Build') {
+        sh "docker build -t ${imageName} ."
+    }
+
+    stage('Test') {
+        ArrayList overrides = [
+            [command: "python3", arguments: "--version"],
+            [command: "unzip", arguments: "-v"]
+        ]
+
+        overrideEntryPoint(overrides, imageName)
+    }
+}
+
+def overrideEntryPoint(ArrayList overrides, String imageName = "test-image") {
+    for (o in overrides) {
+        sh "docker run -i --entrypoint=${o.command} ${imageName} ${o.arguments}"
+    }
+}
